@@ -1,0 +1,12 @@
+*.log
+*.aux
+*.out
+*.gz
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex
+/Altklausur
+/Ueb
+Notizen/.vscode/
+Notizen/_minted/

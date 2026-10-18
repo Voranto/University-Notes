@@ -1,0 +1,333 @@
+
+
+\subsection{O-Notation}
+We have five different functions to represent how fast a function grows
+
+\textbf{Definition 1 (Landau symbols using limits).} For functions $f, g : \mathbb{N} \to \mathbb{R}_{+}$, the following holds:
+
+\[
+\begin{aligned}
+f \in O(g) &\iff \limsup_{n \to \infty} \frac{f(n)}{g(n)} < \infty \\
+f \in o(g) &\iff \lim_{n \to \infty} \frac{f(n)}{g(n)} = 0 \\
+f \in \Omega(g) &\iff \liminf_{n \to \infty} \frac{f(n)}{g(n)} > 0 \\
+f \in \omega(g) &\iff \lim_{n \to \infty} \frac{f(n)}{g(n)} = \infty \\
+f \in \Theta(g) &\iff f \in O(g) \text{ and } f \in \Omega(g)
+\end{aligned}
+\]
+
+\textbf{Definition 2 (Landau symbols using quantifiers).} For functions $f, g : \mathbb{N} \to \mathbb{R}_{+}$, the following holds:
+
+\[
+\begin{aligned}
+f \in O(g) &\iff \exists c > 0 \ \exists n_0 \ \forall n \ge n_0 : f(n) \le c \cdot g(n) \\
+f \in o(g) &\iff \forall c > 0 \ \exists n_0 \ \forall n \ge n_0 : f(n) \le c \cdot g(n) \\
+f \in \Omega(g) &\iff \exists c > 0 \ \exists n_0 \ \forall n \ge n_0 : f(n) \ge c \cdot g(n) \\
+f \in \omega(g) &\iff \forall c > 0 \ \exists n_0 \ \forall n \ge n_0 : f(n) \ge c \cdot g(n) \\
+f \in \Theta(g) &\iff \exists c_1, c_2 > 0 \ \exists n_0 \ \forall n \ge n_0 : c_1 \cdot g(n) \le f(n) \le c_2 \cdot g(n)
+\end{aligned}
+\]
+
+\textbf{Informally,} for functions $f, g : \mathbb{N} \to \mathbb{R}_{+}$, this means:
+
+\[
+\begin{aligned}
+f \in O(g) &\iff f \text{ grows asymptotically at most as fast as } g \\
+f \in o(g) &\iff f \text{ grows asymptotically strictly slower than } g \\
+f \in \Omega(g) &\iff f \text{ grows asymptotically at least as fast as } g \\
+f \in \omega(g) &\iff f \text{ grows asymptotically strictly faster than } g \\
+f \in \Theta(g) &\iff f \text{ grows asymptotically at the same rate as } g
+\end{aligned}
+\]
+
+
+\subsection{Sorting}
+
+\begin{description}
+\item[Given: ] A Set S of n Elements from a total ordered Universe
+	$S=\{s_1, s_2, s_3, \dots s_n\}$
+\item[\bf We are looking for:] A permutation $\pi$ (a bijective function) 
+	$\pi:\{1,\dots,n\}\rightarrow\{1,\dots,n\}$, so that
+	\[
+		s_{\pi(1)}\leq s_{\pi(2)}\leq \dots \leq s_{\pi(n)}
+	\]
+\end{description}
+
+
+
+
+\paragraph{Example:}
+$S=\{2,7,4,3,8\}$
+
+The permutation $\pi$ that we are looking for is:
+\hspace{2cm}
+\begin{tabular}{c|c}
+i & $\pi(i)$	\\
+\hline
+1 & 1\\
+2 & 4\\
+3 & 3\\
+4 & 2\\
+5 & 5\\
+\end{tabular}
+
+\subsection{How to aproach sorting?}
+First we need to define how good an algorithm is for sorting.
+
+Different definitions
+\begin{itemize}
+\item \dots The \emph{Time} necessary to compute on my Desktop PC $\pi$ 
+\item \dots The \emph{Number of processing steps} necessary to compute $\pi$.
+\item \dots The \emph{Space} required to compute $\pi$
+\item \dots The \emph{Number of I/O operations} to compute $\pi$
+\item \dots The \emph{Number of random bits} needed to compute $\pi$
+\end{itemize}
+
+Note: We are only going to refer to \emph{Worst-Case Analysis}.
+
+\subsection{First Sorting Algorithm: BubbleSort}
+We want to form a permutation so that: $\forall 1\leq i<n: A[i]\leq A[i+1]$.
+
+Pseudocode for it:
+\begin{verbatim}
+	00:  BubbleSort(A,n)
+	01:   i=n
+	02:   while (i>1) do
+	03:     j=1
+	04:     while (j<i) do
+	05:       if A[j]>A[j+1]
+	06:         swap(A[j],A[j+1])
+	07:       j=j+1
+	08:     od
+	09:     i=i-1
+	10:   od
+\end{verbatim}
+How to prove that the algorithm does what we want it to do?
+
+Because this sorting algorithm only makes swaps, the array will always be the same size with all the same elements, that is relatively trivial
+
+\begin{lem}
+For a $i \in \{2,\dots,n\}$ lets look at the content of $A[]$ before the execution of the third line and directly before line 9.
+
+The following is true: $A[i]=\max_{1\leq g \leq i} A[g]$
+\end{lem}
+
+\begin{proof}[Proof]
+Let $g_{\max}$ be the biggest Index $\in \{1, \dots, i\}$ with 
+	$A[g_{\max}]=\max_{1\leq g \leq i} A[g]$.
+
+If $j=g_{\max}$ then $A[j]$ is changed with $A[j+1]$ 
+If $j=g_{\max}+1$ then $A[j]$ is changed with $A[j+1]$ 
+\end{proof}
+
+This Lemma implies that the i-th biggest element will be at the end of the i-th loop iteration at the i-th last position.
+
+\begin{thm}
+After running bubbleSort, $A[]$ ends up sorted.
+\end{thm}
+\begin{proof}[Proof]
+Before execution of line 9 the following is true: $A[]$ is sorted from $A[i]$ to $A[n]$ and contains the $(n-i+1)$ biggest Elements.
+If line 9 is reached with $i=2$, then its easy to see that $A[]$ ends up being sorted
+\end{proof}
+
+\subsubsection{Time Complexity}
+How do we define Time Complexity?
+
+Depends on the use case, but for sorting algorithms we are going to define it by the amount of comparisons done.
+
+Why?
+\begin{lem}
+If an Algorithm ends for a set input, it means that at the latest a comparison will be called after $c$ Non-Comparisons
+\end{lem}
+\begin{proof}[Proof]
+If $>c$ instructions are called, then an instruction is called twice, meaning an infinite loop. 
+\end{proof}
+
+If we only count comparisons, we can because of the Lemma before, calculate Time Complexity up to a constant factor
+\subsubsection{Time Complexity of BubbleSort}
+Lets look at the algorithm once again:
+\begin{verbatim}
+	00:  BubbleSort(A,n)
+	01:   i=n
+	02:   while (i>1) do
+	03:     j=1
+	04:     while (j<i) do
+	05:       if A[j]>A[j+1]
+	06:         swap(A[j],A[j+1])
+	07:       j=j+1
+	08:     od
+	09:     i=i-1
+	10:   od
+\end{verbatim}
+
+How many comparisons are called?
+\begin{itemize}
+\item The comparison in line 2 is called $n$ times. 
+\item For a  \emph{set} $i$ is the comparison in line 4 called $i$ times. Because $i$ follows the path from $2$ to $n$, then
+	we can compute the amount of comparisons as $\sum_{i=2}^{n} i$
+\item The comparison in line 5 is for a fixed $i$ called $i-1$ times. So in total $\sum _{i=1}^{n-1} i$.
+
+\end{itemize}
+
+So in total, it would be $n+\sum_{i=2}^n i + \sum_{i=1}^{n-1}i= n+ -1 \sum_{i=1}^n i + \sum_{i=1}^{n-1}i=n+-1+\frac{n(n+1)}{2}+\frac{n(n-1)}{2}=n^2+n-1$ comparisons. This result
+translates to at most $c(n^2+n-1)$ instructions, independent from architecture and such.
+
+
+
+
+\begin{itemize}
+\item Bubblesort has a time complexity of $O(n^2)$ means ''Bubblesort makes asymptotically \emph{no more} than $n^2$ comparisons''
+\item Bubblesort hat Laufzeit $\Theta(n^2)$ meint ''Bubblesort makes asymptotically \emph{exactly} $n^2$ comparisons''
+\item Bubblesort hat Laufzeit $\Omega(n^2)$ meint ''Bubblesort makes asymptotically \emph{at least} $n^2$ comparisons''
+\end{itemize}
+
+It is also correct to say that BubbleSort has a time complexity of $\Omega(n^3)$
+
+Formally we define $O(f(n))$ as a class of functions as follows:
+\[
+	O(f(n))=\{ g(n):\mathbb{N}\rightarrow \mathbb{R} | \exists c>0, n_0\in\mathbb{N} \mbox{ mit } g(n)\leq c\cdot f(n) \forall n\geq n_0\}
+\]
+
+\subsection{MergeSort -- a O(nlog n) Sorting Algorithm}
+
+\begin{verbatim}
+MergeSort(A[1...n])
+  if (n<2) return
+  m=n/2
+  copy A[1...m] to B[1..m]
+  copy A[m+1 .. n] to C[1.. n-m]
+  MergeSort(B[1..m])
+  MergeSort(C[1..(n-m)])
+  merge B and C into A
+  return
+\end{verbatim}
+
+\begin{lem}
+ $\forall n\in \mathbb{N}$: $T(n)\leq c\cdot n\log_2 n$.
+\end{lem} 
+\begin{proof}[Proof (via induction)]
+{\em Induction start:} For $n=1$, $T(n)=1$ stands, so the formula stands for $n=1$ and $c\geq 1$.
+We take the following as true, $T(i)\leq c\cdot n\log_2 n$is true for all $i<n$, and we want to prove
+, that $T(n)\leq c\cdot n\log_2 n$ also stands.
+
+We have $T(n)=2\cdot T(n/2)+c\cdot n \leq 2\cdot c\frac{n}{2}\log_2 \frac{n}{2} + c\cdot n= c\cdot n\log_2 \frac{n}{2}+c\cdot n$; the last inequality stands
+because of the Induction grant for $n$. The following is also true $c\cdot n\log_2\frac{n}{2}+c\cdot n= c\cdot n\log_2 n - c\cdot n + c\cdot n=c\cdot n\log_2 n$.
+\end{proof}
+
+
+
+\subsection{Heapsort -- a O(nlog n) sorting algorithm}
+
+\paragraph{The Heap Data Structure}
+A heap is a \emph{Tree} with a root, that follows the \emph{Heap Property}:
+\begin{description}
+\item[Heap-Property:] For every subtree of the heap, the smallest number will stand at the root.
+
+\end{description}
+
+
+\vspace{1cm}
+
+
+We want to support the following operations for a heap
+\begin{description}
+\item[insert]  
+\item[remove\_min] 
+\item[change\_key] 
+\item[remove] 
+\end{description}
+
+\begin{lem}
+A binary heap with $n$ elements will have a maximum depth of $O(\log(n))$
+\end{lem}
+
+
+\paragraph{Insert}
+
+\begin{lem}
+We can insert with time complexity $O(\log n)$ a element in a heap with $n$ keys. 
+\end{lem}
+
+\paragraph{Construction of the initial heap}
+
+\begin{lem}
+A initial heap with $n$ keys can be constructed in $O(n\log n)$ (will be reduced later)
+\end{lem}
+
+\paragraph{Heapify}
+Heapify consists of taking a node in the heap, and looking at its children. If one or more of the children is smaller than the parent, switch it and propagate that operation to that child.
+
+\begin{lem}
+A initial heap with $n$ keys can be constructed in $O(n)$
+\end{lem}
+
+\paragraph{Remove min operation}
+\begin{lem}
+We can remove the smallest element in $O(\log n )$ time complexity.
+\end{lem}
+This is done by popping the root, returning it and replacing it with the rightmost child in the heap, then calling the heapify routine on the root and letting it 'sift down'
+
+
+
+\paragraph{Change Key Operation}
+
+\begin{lem}
+We can change a key in the heap in $O(\log n )$ time complexity.
+\end{lem}
+(Not shown in class I think, recheck)
+
+\subsubsection{Sorting using a heap}
+Convert the array into a heap in $O(n)$ time, and repeat 'remove min' until heap empty for a total cost of $O(n + n \log n )$
+
+\subsubsection{Converting an array into a heap in O(n)}
+First of all, note we only have to call heapify on the t op $[n/2]$ elements, the rest are leaves and will be handled automatically.
+
+For a node in level i (i = 0 being the leaf level) it has to do at most i comparisons downwards.
+
+At height level i, there will be $\frac{n}{2^i}$ elements that are called on heapify. This is true, because at step one, we are looking at n/2 elements (leaf level), and after each level its cut in half.
+
+Each element will take i comparisons.
+
+\[\sum_{i=1}^{\log(n)}i \frac{n}{2^{i}} =n\sum_{i=1}^{\log(n)}i \frac{1}{2^{i}} \in_{\text{Assume as true}} O(n)\]
+
+\subsection{Lower Bound for Deterministic Sorting Algorithms}
+
+We have now encountered two deterministic sorting algorithms (Merge Sort and Heap Sort)
+that have a \emph{worst-case} running time of $\Theta(n \log n)$.
+One might ask whether there exists, for example, a deterministic sorting algorithm
+with a running time of $o(n \log n)$—perhaps even one with
+\emph{linear} running time $O(n)$.  
+In the following, we will show that this is not the case.
+
+\begin{thm}
+Every comparison-based, deterministic sorting algorithm requires
+$\Omega(n \log n)$ comparisons in the worst case to sort $n$ numbers.
+\end{thm}
+
+\begin{proof}
+We consider the execution of an arbitrary deterministic sorting algorithm
+as a sequence of comparisons between input elements.
+Which elements are compared depends on the outcomes of the previous comparisons.
+The possible executions (i.e., the sequences of comparisons) for different inputs
+can be represented as a binary tree:
+each internal node corresponds to a comparison between two input elements,
+the left child is followed if the result is $<$,
+and the right child if the result is $>$.
+Each possible input permutation thus leads to a leaf in this tree.
+
+Since two distinct input permutations must not reach the same leaf
+(otherwise the algorithm would behave identically for both inputs,
+and at least one input would not be sorted correctly),
+the tree must have at least $n!$ leaves.
+A full binary tree of height $h$ has at most $2^h$ leaves,
+so we must have $h \ge \log_2 n!$.
+That means there exist inputs for which the algorithm performs
+at least $\log_2 n!$ comparisons.
+
+According to Stirling’s approximation,
+\[
+n! \approx \sqrt{2 \pi n} \left(\frac{n}{e}\right)^n,
+\]
+and in particular $n! > (n/e)^n$.
+It follows that $h \ge n \log_2 (n/e)$,
+and therefore $h \in \Omega(n \log n)$.
+\end{proof}

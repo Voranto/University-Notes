@@ -1,0 +1,309 @@
+\documentclass[11pt]{extarticle}
+\usepackage[a4paper,margin=2cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage[utf8]{inputenc}
+\usepackage{enumitem}
+\setlist{leftmargin=1.4em,itemsep=3pt,topsep=2pt}
+\usepackage{array}
+\usepackage{titlesec}
+\titlespacing*{\section}{0pt}{14pt}{6pt}
+\titlespacing*{\subsection}{0pt}{10pt}{4pt}
+\titleformat{\section}{\bfseries\Large}{\thesection}{0.4em}{}
+\titleformat{\subsection}{\bfseries\large}{}{0em}{}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+\begin{document}
+
+\section{Norms}
+A norm measures vector size; must satisfy definiteness, homogeneity, triangle inequality.
+
+$\|v\|_2=\sqrt{\sum v_i^2}$, $\|v\|_1=\sum|v_i|$, $\|v\|_\infty=\max|v_i|$
+
+\section{Errors \& Condition}
+Absolute error $\Delta y=\tilde y-y$; relative error normalizes by scale:
+
+$\delta_y=\dfrac{\|\Delta y\|}{\|y\|}$
+
+Condition number = sensitivity of output to input perturbations (property of the \emph{problem}, not the algorithm).
+
+$k_{\text{abs}}=|f'(x)|$, \quad $k_{\text{rel}}=\dfrac{|x|}{|y|}|f'(x)|$
+
+$n$-dim: $k_{\text{rel}}(x)=\max_j\left|\dfrac{\partial f}{\partial x_j}\dfrac{x_j}{f(x)}\right|$
+
+Common cases:
+
+$\sqrt{x}$: $k_{\text{rel}}=\tfrac12$ \quad $\times$: $k_{\text{rel}}=1$
+
+$+$: $k_{\text{rel}}=\max\left\{\left|\tfrac{x_1}{x_1+x_2}\right|,\left|\tfrac{x_2}{x_1+x_2}\right|\right\}$ $\to$ blows up under cancellation ($x_1\approx -x_2$).
+
+Linear operator $L$: stretch in worst direction times stretch of inverse:
+
+$k_{\text{rel}}(L)=\|L\|_{X\to Y}\|L^{-1}\|_{Y\to X}$
+
+\emph{Stability} (opposed to condition) is a property of the \emph{algorithm}: computed result should equal the exact solution of a slightly perturbed input.
+
+\section{Floating Point}
+Numbers are stored as $x=M\cdot B^E$ with base $B$, integer mantissa $M$, exponent $E$. Normalizing $M$ to a fixed number of digits $t$ gives (roughly) constant \emph{relative} spacing.
+
+\textbf{Formal definition:}
+\[
+\mathbb F_{B,t}=\Big\{\,M\cdot B^E \ \Big|\ M,E\in\mathbb Z,\ B^{t-1}\le|M|<B^t\ \text{ or }\ M=0\,\Big\}
+\]
+Bounding the exponent to make the set finite:
+\[
+\mathbb F_{B,t,\alpha,\beta}=\{x\in\mathbb F_{B,t}\mid \alpha\le E\le \beta\}
+\]
+($B$ = base, $t$ = number of mantissa digits/precision, $\alpha,\beta$ = exponent range.)
+
+$M_{\min}=B^{t-1}$, $M_{\max}=B^t-1$
+
+Relative spacing $\varrho=B^{1-t}$, \quad machine precision $eps=\varrho/2$
+
+Extremal representable numbers: $\sigma=B^{t-1}B^\alpha$ (smallest), \ $\lambda=(B^t-1)B^\beta$ (largest)
+
+Rounding: $\operatorname{rd}(x)=x(1+\varepsilon)$, $|\varepsilon|\le eps$
+
+\section{Linear Systems}
+\subsection{LR / Gauss}
+Gaussian elimination reduces $A$ to upper-triangular $R$ column by column; the multiplier used to zero out each entry below the pivot is stored as $l_{i,j}$. Collecting these multipliers into a unit-lower-triangular matrix $L$ reproduces exactly the same elimination steps, giving the factorization $A=LR$. Once factored, $Ax=b$ reduces to two cheap triangular solves ($Ly=b$, then $Rx=y$) --- useful when solving for many right-hand sides $b$.
+
+$l_{i,j}=a_{i,j}^{(j)}/a_{j,j}^{(j)}$
+
+$a_{i,k}^{(j+1)}=a_{i,k}^{(j)}-l_{i,j}a_{j,k}^{(j)}$
+
+$A=LR$, \ $PA=LR$ (with row pivoting $P$ if a pivot is zero/small)
+
+Cost: $O(n^3/3)$, back-subst.\ $O(n^2)$
+
+$x_i=\dfrac{b_i-\sum_{j>i}a_{i,j}x_j}{a_{i,i}}$
+
+\subsection{Condition of $Ax=b$}
+$\dfrac{\|\Delta x\|}{\|x\|}\le k_{\text{rel}}(A)\dfrac{\|\Delta b\|}{\|b\|}$,\ $k_{\text{rel}}(A)=\|A\|\|A^{-1}\|$
+
+Perturbed $A$: $\dfrac{\|\Delta x\|}{\|x\|}\le\dfrac{k_{\text{rel}}(A)}{1-k_{\text{rel}}(A)\frac{\|\Delta A\|}{\|A\|}}\left(\dfrac{\|\Delta A\|}{\|A\|}+\dfrac{\|\Delta b\|}{\|b\|}\right)$
+
+\subsection{Residual}
+Residual $\tilde r=b-A\tilde x$ measures how far a computed $\tilde x$ is from solving the system exactly; a small residual guarantees a small error only if $A$ is well-conditioned.
+
+$\tilde r=b-A\tilde x=-A\Delta x$
+
+$\dfrac{1}{\|A^{-1}\|}\|\Delta x\|\le\|\tilde r\|\le\|A\|\|\Delta x\|$
+
+\subsection{QR / Givens}
+Instead of eliminating with row operations, multiply $A$ from the left by orthogonal Givens rotation matrices $G_{j,i}$, each chosen to zero out one specific subdiagonal entry without disturbing already-zeroed entries. Orthogonal transformations never amplify errors ($\|Qx\|=\|x\|$), so this is more numerically stable than LR --- at roughly twice the cost. The accumulated rotations give $Q^TA=R$ (upper triangular); solving $Ax=b$ becomes $y=Q^Tb$, then $Rx=y$.
+
+$Q^TQ=I$, $\det Q=\pm1$
+
+$2\times2$ rotation: $G=\begin{bmatrix}c&s\\-s&c\end{bmatrix}$
+
+To zero $a_{i,j}$ using row $j$: $\rho=\pm\sqrt{a_{jj}^2+a_{ij}^2}$,\ $c=\tfrac{a_{jj}}{\rho}$,\ $s=\tfrac{a_{ij}}{\rho}$
+
+$Q^TA=R$, solve $y=Q^Tb$, then $Rx=y$
+
+Cost $\approx 2\times$ LR; works even if $A$ is not square/regular
+
+\subsection{SVD}
+Decomposes the action of $A$ into: rotate ($V^T$), scale each axis by $\sigma_i$ ($\Sigma$), rotate again ($U$). Keeping only the largest few $\sigma_i$ gives a cheap low-rank approximation of $A$.
+
+$A=U\Sigma V^T=\sum_i\sigma_iu_iv_i^T$, \ $\sigma_1\ge\sigma_2\ge\dots\ge0$
+
+Rank-$r$ approx.: $\tilde A=\sum_{i=1}^r\sigma_iu_iv_i^T$
+
+\section{Least Squares}
+When $A$ is $m\times n$ with $m>n$ (more equations than unknowns), $Ax=b$ generally has no exact solution; instead we minimize the residual norm.
+
+$x^*=\arg\min\|Ax-b\|_2$
+
+Setting $\nabla f=0$ for $f(x)=\|Ax-b\|_2^2$ gives the \textbf{Normal Equation}:
+
+$A^TAx^*=A^Tb$, \quad $\nabla f=2(A^TAx-A^Tb)$, $H_f=2A^TA\succ0$
+
+At the optimum the residual is orthogonal to the column space of $A$:
+
+Residual $\perp$ image($A$): $A^T\tilde r^*=0$
+
+Alternative: use $A=QR$, reduce to the triangular system $\|Rx-Q^Tb\|_2$ --- costs the same asymptotically but is numerically more stable than forming $A^TA$ directly.
+
+Cost: Normal Eq.\ $O(mn^2{+}n^3)$; QR $O(mn^2{+}n^3)$ (QR more stable)
+
+\section{Interpolation}
+Given points $(x_i,f(x_i))$, find a function (usually a polynomial) that matches them exactly, to later evaluate/differentiate/integrate cheaply.
+
+\subsection{Lagrange}
+Build a basis polynomial $l_{j,n}$ that is $1$ at node $x_j$ and $0$ at every other node; the interpolant is just a weighted sum of these.
+
+$l_{j,n}(x)=\displaystyle\prod_{i\ne j}\frac{x-x_i}{x_j-x_i}$
+
+$L(x)=\sum_j y_jl_{j,n}(x)$
+
+\subsection{Aitken--Neville}
+Builds the interpolation value at one point $x$ recursively by blending lower-degree interpolants; efficient when only a single evaluation point is needed ($O(n^2)$, no explicit polynomial coefficients).
+
+$P_{i,k}(x)=\dfrac{x-x_{i-k}}{x_i-x_{i-k}}P_{i,k-1}(x)+\dfrac{x_i-x}{x_i-x_{i-k}}P_{i-1,k-1}(x)$
+
+\subsection{Newton / Divided Diff.}
+Expresses the interpolant so that adding a new support point only adds one more term, without recomputing the rest --- convenient when nodes are added incrementally.
+
+$[x_{i-k},\dots,x_i]f=\dfrac{[x_{i-k+1},\dots,x_i]f-[x_{i-k},\dots,x_{i-1}]f}{x_i-x_{i-k}}$
+
+$P_n(x)=\sum_{k=0}^n[x_0,\dots,x_k]f\prod_{i<k}(x-x_i)$
+
+Coincident nodes (Hermite/Taylor limit): $[\underbrace{x_0,\dots,x_0}_{k+1}]f=\dfrac{f^{(k)}(x_0)}{k!}$
+
+\subsection{Error}
+$f(x)-P_n(x)=\dfrac{f^{(n+1)}(\xi)}{(n+1)!}\Phi_n(x)$,\ $\Phi_n(x)=\prod_i(x-x_i)$
+
+Equidistant nodes: error bound grows badly (Runge's phenomenon):
+
+$|\Phi_n(x)|\le n!\,h_n^{n+1}=\dfrac{n!H^{n+1}}{n^{n+1}}\approx O\!\left(\left(\tfrac2e\right)^n\right)$
+
+Chebyshev nodes minimize the worst-case $|\Phi_n|$ instead, fixing this:
+
+$x_i=\cos\dfrac{(2i{+}1)\pi}{2(n{+}1)}$, \ minimizes $\max|\Phi_n|=2^{-n}$
+
+\subsection{Splines (cubic, order $k=4$)}
+Instead of one high-degree polynomial (which oscillates), use low-degree (cubic) pieces glued together with matching value, slope, and curvature at each knot --- avoids Runge's phenomenon entirely.
+
+Degrees of freedom: $\dim\mathbb P_{k,\tau}=k+N-1$
+
+Local piece (Hermite blending form), $t=\tfrac{x-\tau_i}{h_i}$:
+
+$s_i(x)=(1{-}3t^2{+}2t^3)y_i+(3t^2{-}2t^3)y_{i+1}+(t{-}2t^2{+}t^3)h_iy_i'+(t^3{-}t^2)h_iy_{i+1}'$
+
+$C^2$ continuity condition at each inner knot (unknowns: slopes $y_i'$):
+
+$\tfrac{1}{h_{i-1}}y'_{i-1}+\left(\tfrac{2}{h_{i-1}}{+}\tfrac{2}{h_i}\right)y'_i+\tfrac1{h_i}y'_{i+1}=3\tfrac{y_{i+1}-y_i}{h_i^2}+3\tfrac{y_i-y_{i-1}}{h_{i-1}^2}$
+
+Error: $\|f-s\|_\infty\le Ch^4\|f^{(4)}\|_\infty$
+
+Missing 2 equations closed by boundary conditions: natural $s''(\tau_0){=}s''(\tau_N){=}0$; clamped $y_0'{=}f'(a)$
+
+\subsection{FFT / DFT}
+Interpolates equally-spaced points on the unit circle with a trigonometric polynomial; the Fast Fourier Transform computes this (and its inverse) in $O(n\log n)$ instead of $O(n^2)$ by recursively splitting into even/odd indexed coefficients.
+
+$\omega_n=e^{2\pi i/n}$,\ interpolation matrix $M=(\omega_n^{jk})$
+
+$M^{-1}=\tfrac1n\overline M$,\ $\vec c=\tfrac1n\overline M\vec v$ (DFT: values $\to$ coefficients)
+
+Divide-and-conquer (even/odd split), with $m=n/2$:
+
+$v_j=\sum c_{2k}\omega_m^{kj}+\omega_n^j\sum c_{2k+1}\omega_m^{kj}$
+
+$v_{m+j}=\sum c_{2k}\omega_m^{kj}-\omega_n^j\sum c_{2k+1}\omega_m^{kj}$
+
+$T(n)=2T(n/2)+\Theta(n)=\Theta(n\log n)$
+
+\section{Quadrature}
+Approximate $I(f)=\int_a^b f(x)\,dx$ as a weighted sum of function evaluations $\tilde I(f)=(b{-}a)\sum_j c_jf(x_j)$; weights/nodes define the rule.
+
+\subsection{Basic rules ($[a,b]$)}
+Midpoint: $\tilde I=(b{-}a)f(\tfrac{a+b}2)$
+
+Trapezoid: $\tilde I=\tfrac{b-a}2(f(a){+}f(b))$
+
+Simpson: $\tilde I=\tfrac{b-a}6\!\left(f(a){+}4f(\tfrac{a+b}2){+}f(b)\right)$
+
+\subsection{Errors (single interval)}
+Trapezoid: $I-\tilde I=-\tfrac1{12}(b-a)^3f''(\zeta)$
+
+\subsection{Weights (general / Newton--Cotes)}
+Choose weights so every degree-$\le m$ polynomial is integrated exactly (integrate the Lagrange basis polynomials):
+
+$c_j=\dfrac1{b-a}\displaystyle\int_a^b l_{j,m}(x)\,dx$
+
+Degree of accuracy $\ge m$ automatically; equidistant nodes $\Rightarrow$ weights can turn negative for $m\ge8$ (unstable).
+
+\subsection{Gauss Quadrature}
+Instead of fixing nodes and solving for weights, also optimize the node \emph{positions} --- doubles the achievable exactness. Optimal nodes are the roots of the Legendre polynomial.
+
+Max degree of accuracy $=2m+1$ (nodes = zeros of $\tilde P_{m+1}$)
+
+Legendre polynomials, orthogonal w.r.t.\ $\langle f,g\rangle=\int_{-1}^1fg\,dx$:
+
+$P_0=1,\ P_1=x,\ P_n=\dfrac{2n-1}{n}xP_{n-1}-\dfrac{n-1}{n}P_{n-2}$
+
+Weights are always positive: $c_i=\tfrac12\int_{-1}^1 l_{i,m}^2\,dx>0$
+
+\subsection{Composite}
+Split $[a,b]$ into $N$ equal panels and apply a basic rule on each, summing the results --- trades node count for accuracy.
+
+$T(h)=h\!\left[\tfrac{f(\tau_0)}2{+}\!\!\sum_{i=1}^{N-1}\!f(\tau_i){+}\tfrac{f(\tau_N)}2\right]$
+
+Trap.\ error: $O(h^2)=O(N^{-2})$,\ deg.acc.$=1$
+
+Simpson error: $O(h^4)=O(N^{-4})$,\ deg.acc.$=3$
+
+\subsection{Richardson / Romberg}
+Since the trapezoid error expands only in \emph{even} powers of $h$ (Euler--Maclaurin), combining $T(h)$ and $T(h/2)$ cancels the leading error term for free, giving Simpson's rule; repeating this recursively (Romberg) cancels ever more terms.
+
+$S(h)=\tfrac43T(h/2)-\tfrac13T(h)$
+
+Euler--Maclaurin: $T(h)-I(f)=c_1h^2+c_2h^4+\dots+O(h^{2p+2})$
+
+$T_{i,0}=T(2^{-i}h)$,\ $T_{i,k}=\dfrac{4^kT_{i,k-1}-T_{i-1,k-1}}{4^k-1}$
+
+Error of $T_{i,k}$: $O(h^{2k+2})$
+
+\subsection{Monte Carlo}
+Approximate the integral (as an expectation) by averaging $f$ at $N$ random points --- slow ($O(N^{-1/2})$) but the rate doesn't degrade with dimension, unlike grid-based rules.
+
+$\bar f=\tfrac1N\sum f(x_i)$,\ $\mathbb V(\bar f)=\tfrac1N\mathbb V(f)$
+
+Accuracy $O(N^{-1/2})$ (indep.\ of dimension $d$)
+
+\subsection{Tensor-product}
+Apply a 1D rule along each axis separately; accurate but cost grows exponentially in dimension.
+
+Precision $O(m^{-2})$, cost $O(m^d)$
+
+\section{ODEs}
+An initial value problem specifies a curve via its derivative; we step forward in time approximating the unknown solution at discrete points $y^j\approx y(t_j)$.
+
+IVP: $y'(t)=f(t,y(t))$, $y(t_0)=y^0$
+
+\subsection{Explicit Euler}
+Approximate $\int_{t_j}^{t_{j+1}}f\,ds$ by a rectangle using the left endpoint --- cheap (one function evaluation), but only first order and can be numerically unstable for stiff problems.
+
+$y^{j+1}=y^j+hf(t_j,y^j)$
+
+Test eq.\ $y'=-\lambda y$: $y^{j+1}=(1-h\lambda)^{j+1}y^0$
+
+\subsection{Implicit Euler}
+Same idea but evaluates $f$ at the \emph{new}, unknown point --- requires solving an equation each step, but is far more stable.
+
+$y^{j+1}=y^j+hf(t_{j+1},y^{j+1})$
+
+Test eq.: $y^{j+1}=\left(\dfrac1{1+h\lambda}\right)^{j+1}y^0$
+
+\subsection{Trapezoid (implicit, $p=2$)}
+Averages the slope at both endpoints of the step; second order, but implicit (needs to solve for $y^{j+1}$).
+
+$y^{j+1}=y^j+\tfrac h2\big(f(t_j,y^j)+f(t_{j+1},y^{j+1})\big)$
+
+\subsection{Heun (explicit, $p=2$)}
+Predictor-corrector: first guess $y^{j+1}$ with explicit Euler, then plug that guess into the trapezoid formula --- gets second order accuracy while staying fully explicit.
+
+$\tilde y^{j+1}=y^j+hf(t_j,y^j)$
+
+$y^{j+1}=y^j+\tfrac h2\big(f(t_j,y^j)+f(t_{j+1},\tilde y^{j+1})\big)$
+
+\subsection{Runge--Kutta (general)}
+Generalizes Heun: evaluate $f$ at several intermediate points $s_l$ within the step, combine the resulting slopes $k_l$ with tuned weights $\gamma_l$ to cancel as many Taylor error terms as possible.
+
+$s_l=t_j+\alpha_lh$,\ $k_l=f(s_l,u_l)$ \quad (auxiliary directions)
+
+$u_i=y^j+h\sum_l\beta_{i,l}k_l$ \quad (stage values)
+
+$y^{j+1}=y^j+h\sum_l\gamma_lk_l$ \quad (update)
+
+\subsection{Consistency / Convergence}
+Consistency = error made in a \emph{single} step (local); convergence = accumulated error over all steps (global). Consistency of order $p$ implies convergence of order $p$.
+
+$\tau_{j,h}=\dfrac{y(t_{j+1})-y^{j+1}}{h}$
+
+Consistent order $p\Rightarrow$ convergent order $p$
+
+Explicit/Implicit Euler: $\tau_{j,h}=\tfrac h2y''(t_j)+O(h^2)$ $\Rightarrow p=1$
+
+\end{document}

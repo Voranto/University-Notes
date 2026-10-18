@@ -1,0 +1,14 @@
+DBMS = Database Management System
+DBS = DB + DBMS
+ACID = Atomicity Consistency Isolated execution Durability
+DW = Data Warehouse
+OLTP = Online Transaction Processing
+rn = Role Name for entity relationships
+Data Mining: Finding hidden patterns in data
+DBS Requirements: Operational Data Control + Enforced Integrity(access) + Ease of Use + Data Independence + Efficiency
+Super key: Attributes that uniquely ID each entitty
+Candidate key: Minimal super key
+Primary key: One of the candidate keys
+Weak Entity set: No primary key -> Discriminator: Partial key, where when paired with primary key of the strong entity key owner. (Hotel Nr)
+
+

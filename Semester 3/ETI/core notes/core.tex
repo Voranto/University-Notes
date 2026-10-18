@@ -1,0 +1,60 @@
+\documentclass{article}
+\usepackage{a4wide}
+\usepackage{graphicx}
+\usepackage{amsmath, amsthm, amssymb}
+\usepackage[utf8]{inputenc}
+\usepackage{ngerman}
+\usepackage{url}
+\usepackage[ruled,vlined]{algorithm2e}
+\usepackage{hyperref}
+\usepackage{listings}
+
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{cor}[thm]{Korollar}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{defi}[thm]{Definition}
+\usepackage{listings}
+\lstdefinelanguage{Pseudo}{
+  morekeywords={forall,if,then,else,return,while,do,for,DFS},
+  sensitive=false,
+  morecomment=[l]{//},
+  morestring=[b]"
+}
+
+
+\begin{document}
+\title{Core Notes for ETI}
+\date{Wintersemester 2025/26}
+\author{Universität Stuttgart}
+\maketitle
+\tableofcontents
+
+\newpage
+\section{Logic Gates}
+AND is like circle cut in half
+
+OR is concave
+
+XOR has bar to the right of OR
+
+Volladdierer = 2 halbaddierer + or gate
+
+\section{CMOS Logic}
+$f_p$ pull up network, with PMOS, works inverted
+
+$f_N$ pull down network with NMOS
+
+
+
+
+\section{Floating Point Numbers}
+Fließkommaaddition ist nicht assoziativ
+
+Rump Example: Floating points number error can carry a lot
+
+CPU : $Rount(Round(x\cdot y)  + z)$ -- GPU : $Round[(x\cdot y ) + z]$
+
+\subsection{IEE 754}
+
+\end{document}
+
